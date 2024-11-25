@@ -14,14 +14,14 @@ import { MoneyInput } from "./money-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { TRANSACTION_CATEGORY_OPTIONS, TRANSACTION_PAYMENT_METHOD_OPTIONS, TRANSACTION_TYPE_OPTIONS } from "../_constants/transaction";
 import { DatePicker } from "./ui/date-picker";
+import addTransaction from "../_actions/add-transactions";
+import { useState } from "react";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, {
     message: "O nome é obrigatório",
   }),
-  amount: z.string().trim().min(1, {
-    message: "O valor é obrigatório",
-  }),
+  amount: z.number({required_error: "O valor é obrigatório"}).positive({message: "O valor deve ser positivo"}),
   type: z.nativeEnum(TransactionType, {
     required_error: "O tipo é obrigatório",
   }),
@@ -39,11 +39,13 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>
 
 const AddTransactionButton = () => {
+  const [dialogIsOpen, setDialogIsOpen] = useState(false);
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      amount: "",
+      amount: 0,
       type: TransactionType.EXPENSE,
       category: TransactionCategory.OTHER,
       paymentMethod: TransactionPaymentMethod.CASH,
@@ -51,15 +53,24 @@ const AddTransactionButton = () => {
     },
   })
 
-  const onSubmit = (data: FormSchema) => {
-
+  const onSubmit = async (data: FormSchema) => {
+    try {
+      await addTransaction(data)
+      setDialogIsOpen(false)
+      form.reset()
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
-    <Dialog onOpenChange={(open) => {
-      if (!open) {
-        form.reset();
-      }
+    <Dialog
+      open={dialogIsOpen}
+      onOpenChange={(open) => {
+        setDialogIsOpen(open)
+        if (!open) {
+          form.reset();
+        }
     }}>
       <DialogTrigger asChild>
         <Button className="rounded-full font-bold">
@@ -68,14 +79,14 @@ const AddTransactionButton = () => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent >
         <DialogHeader>
           <DialogTitle>Adicionar Transação</DialogTitle>
           <DialogDescription>Insira as informações abaixo</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
             <FormField
               control={form.control}
               name="name"
@@ -97,7 +108,13 @@ const AddTransactionButton = () => {
                 <FormItem>
                   <FormLabel>Valor</FormLabel>
                   <FormControl>
-                    <MoneyInput placeholder="Digite o valor" {...field} />
+                    <MoneyInput 
+                      placeholder="Digite o valor"
+                      value={field.value}
+                      onValueChange={({floatValue}) => field.onChange(floatValue)}
+                      onBlur={field.onBlur}
+                      disabled={field.disabled}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -109,7 +126,7 @@ const AddTransactionButton = () => {
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Tipo</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -134,7 +151,7 @@ const AddTransactionButton = () => {
               name="paymentMethod"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Método de Pagamento</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -159,7 +176,7 @@ const AddTransactionButton = () => {
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Categoria</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
