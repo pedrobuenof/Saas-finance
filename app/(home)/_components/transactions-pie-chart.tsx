@@ -59,7 +59,7 @@ const TransactionPieChart = ({ depositsTotal, investmentsTotal, expensesTotal, t
     },
   ];
   return (
-    <Card className="flex flex-col p-12">
+    <Card className="flex flex-col p-6">
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
@@ -91,7 +91,7 @@ const TransactionPieChart = ({ depositsTotal, investmentsTotal, expensesTotal, t
           />
           <PercentageItem
             icon={<PiggyBankIcon size={16} />}
-            title="Investimento"
+            title="Investido"
             value={typesPercentage[TransactionType.INVESTMENT]}
           />
         </div>
