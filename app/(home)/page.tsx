@@ -52,9 +52,6 @@ const HomePage = async ({searchParams: { month } }: HomeProps) => {
           </div>
           {/* SIDE CONTENT */}
           <LastTransactions lastTransactions={dashboard.lastTransactions}/>
-          <div>
-
-          </div>
         </div>
       </div>
     </>
