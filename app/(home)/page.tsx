@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Navbar from "../_components/navbar";
 import SummaryCards from "./_components/summary-cards";
@@ -8,6 +8,7 @@ import TransactionPieChart from "./_components/transactions-pie-chart";
 import { getDashboard } from "../_data/get-dashboard";
 import ExpensesPerCategory from "./_components/expenses-per-category";
 import LastTransactions from "./_components/last-transaction";
+import { canUserAddTransaction } from "../_data/can-user-add-transaction";
 
 interface HomeProps {
   searchParams: {
@@ -28,7 +29,8 @@ const HomePage = async ({searchParams: { month } }: HomeProps) => {
   }
 
   const dashboard = await getDashboard(month)
-
+  const userCanAddTransaction = await canUserAddTransaction();
+  const user = await clerkClient().users.getUser(userId);
   return (
     <>    
       <Navbar />
@@ -42,7 +44,7 @@ const HomePage = async ({searchParams: { month } }: HomeProps) => {
         <div className="grid grid-cols-[2fr,1fr] gap-6">
           {/* MAIN CONTENT */}
           <div className="flex flex-col gap-6">
-            <SummaryCards month={month} {...dashboard}/>
+            <SummaryCards month={month} {...dashboard} userCanAddTransaction={userCanAddTransaction}/>
             
 
             <div className="grid grid-cols-3 grid-rows-1 gap-6">
