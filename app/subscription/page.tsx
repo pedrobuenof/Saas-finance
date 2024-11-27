@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import Navbar from "../_components/navbar";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader } from "../_components/ui/card";
@@ -12,6 +12,10 @@ const SubscriptionPage = async () => {
   if (!userId) {
     redirect("/login")
   }
+
+  const user = await clerkClient().users.getUser(userId);
+  const currentMonthTransactions = await getCurrentMonthTransactions();
+  const hasPremiumPlan = user.publicMetadata.subscriptionPlan == "premium";
   return (
     <>
       <Navbar />
