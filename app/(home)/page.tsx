@@ -4,6 +4,8 @@ import Navbar from "../_components/navbar";
 import SummaryCards from "./_components/summary-cards";
 import TimeSelect from "./_components/time-select";
 import { isMatch } from "date-fns";
+import TransactionPieChart from "./_components/transactions-pie-chart";
+import { getDashboard } from "../_data/get-dashboard";
 
 interface HomeProps {
   searchParams: {
@@ -23,15 +25,34 @@ const HomePage = async ({searchParams: { month } }: HomeProps) => {
     redirect("?month=01");
   }
 
+  const dashboard = await getDashboard(month)
+
   return (
     <>    
       <Navbar />
       <div className="p-6 space-y-6">
+        {/* HEADER/TITLE */}
         <div className="flex justify-between">
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <TimeSelect />
         </div>
-        <SummaryCards month={month}/>
+        {/* CONTENT */}
+        <div className="grid grid-cols-[2fr,1fr]">
+          {/* MAIN CONTENT */}
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-[2fr,1fr]">
+              <SummaryCards month={month} {...dashboard}/>
+            </div>
+
+            <div className="grid grid-cols-3 grid-rows-1 gap-6">
+              <TransactionPieChart {...dashboard}/>
+            </div>
+          </div>
+          {/* SIDE CONTENT */}
+          <div>
+
+          </div>
+        </div>
       </div>
     </>
   );
