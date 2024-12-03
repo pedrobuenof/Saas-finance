@@ -32,11 +32,13 @@ const HomePage = async ({searchParams: { month } }: HomeProps) => {
   }
 
   // CHAMADAS AO BANCO DE DADOS
-  const [dashboard, userCanAddTransaction] = await Promise.all([
+  const [dashboard, userCanAddTransaction, user] = await Promise.all([
     getDashboard(month),
     canUserAddTransaction(),
+    clerkClient().users.getUser(userId),
   ]);
-  const user = await clerkClient().users.getUser(userId);
+
+  
   return (
     <>    
       <Navbar />

@@ -13,16 +13,18 @@ const TransactionPage = async () => {
   if (!userId) {
     redirect("/login")
   }
+  const [transactions, userCanAddTransaction] = await Promise.all([
+    db.transaction.findMany({
+      where: {
+        userId,
+      },
+      orderBy: {
+        date: "desc",
+      },
+    }),
+    canUserAddTransaction()
+  ])
 
-  const transactions = await db.transaction.findMany({
-    where: {
-      userId,
-    },
-    orderBy: {
-      date: "desc",
-    },
-  });
-  const userCanAddTransaction = await canUserAddTransaction();
 
   return (
     <>
