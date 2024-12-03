@@ -18,19 +18,24 @@ interface HomeProps {
 }
 
 const HomePage = async ({searchParams: { month } }: HomeProps) => {
+  //VALIDAÇÃO SE O USUÁRIO EXISTE
   const { userId } = await auth();
 
   if (!userId) {
     redirect("/login")
   }
 
+  // VALIDAÇÃO DO MÊS
   const monthIsInvalid = !month || !isMatch(month, "MM");
   if (monthIsInvalid) {
     redirect(`?month=${new Date().getMonth() + 1}`);
   }
 
-  const dashboard = await getDashboard(month)
-  const userCanAddTransaction = await canUserAddTransaction();
+  // CHAMADAS AO BANCO DE DADOS
+  const [dashboard, userCanAddTransaction] = await Promise.all([
+    getDashboard(month),
+    canUserAddTransaction(),
+  ]);
   const user = await clerkClient().users.getUser(userId);
   return (
     <>    
