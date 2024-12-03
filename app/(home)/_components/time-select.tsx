@@ -18,13 +18,18 @@ const MONTH_OPTIONS = [
   { value: "12", label: "December" },
 ];
 
+const isValidMonth = (month: string | null) => MONTH_OPTIONS.some((option) => option.value === month);
+
 const TimeSelect = () => {
   const { push } = useRouter()
   const searchParams = useSearchParams();
   const month = searchParams.get("month")
 
   const handleMonthChange = (month: string) => {
-    push(`/?month=${month}`)
+    // VALIDAÇÃO DE MÊS ACEITO
+    if (isValidMonth(month)) {
+      push(`/?month=${month}`)
+    }
   }
   
   return (
@@ -33,7 +38,7 @@ const TimeSelect = () => {
       defaultValue={month ?? ""}
     >
       <SelectTrigger className="w-[150px] rounded-full">
-        <SelectValue placeholder="Mês" />
+        <SelectValue placeholder="Selecione o mês" />
       </SelectTrigger>
       <SelectContent>
         {MONTH_OPTIONS.map((option) => (
