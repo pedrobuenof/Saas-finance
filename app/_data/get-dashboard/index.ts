@@ -13,7 +13,7 @@ const getUserId = () => {
   return userId
 }
 
-export const getDashboard = async (month: string) => {
+export const getDashboard = async (month: string) => {  
   const userId = getUserId();
   
   const where = {
@@ -29,7 +29,6 @@ export const getDashboard = async (month: string) => {
     investmentsTotal,
     expensesTotal,
     transactionsTotal,
-    totalExpensePerCategory,
     lastTransactions,
   ] = await Promise.all([
     db.transaction.aggregate({
@@ -52,26 +51,6 @@ export const getDashboard = async (month: string) => {
       _sum: { amount: true },
     }).then(res => Number(res?._sum.amount || 0)),
 
-    // Agrupamento das despesas por categoria
-    db.transaction.groupBy({
-      by: ["category"],
-      where: {
-        ...where,
-        type: TransactionType.EXPENSE,
-      },
-      _sum: {
-        amount: true,
-      },
-    }).then((categories): TotalExpensePerCategory[] =>
-      categories.map((category) => ({
-        category: category.category,
-        totalAmount: Number(category._sum.amount || 0),
-        percentageOfTotal: expensesTotal ? Math.round(
-          (Number(category._sum.amount || 0) / expensesTotal) * 100
-        ) : 0,
-      }))
-    ),
-
     // Consultando as últimas transações
     db.transaction.findMany({
       where,
@@ -87,6 +66,24 @@ export const getDashboard = async (month: string) => {
     [TransactionType.EXPENSE]: transactionsTotal ? Math.round((expensesTotal / transactionsTotal) * 100) : 0,
     [TransactionType.INVESTMENT]: transactionsTotal ? Math.round((investmentsTotal / transactionsTotal) * 100) : 0,
   };
+
+  const totalExpensePerCategory: TotalExpensePerCategory[] = (
+    await db.transaction.groupBy({
+      by: ["category"],
+      where: {
+        ...where,
+        type: TransactionType.EXPENSE,
+      },
+      _sum: {
+        amount: true,
+      },
+    })
+  ).map((category) => ({
+    category: category.category,
+    totalAmount: Number( category._sum.amount || 0 ),
+    percentageOfTotal: expensesTotal ? Math.round(
+      (Number(category._sum.amount || 0) / expensesTotal) * 100) : 0,
+  }));
   
   return {
     balance,
