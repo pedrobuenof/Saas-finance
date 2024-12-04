@@ -17,13 +17,19 @@ interface HomeProps {
   },
 }
 
-const HomePage = async ({searchParams: { month } }: HomeProps) => {
+const getUserId = async () => {
   //VALIDAÇÃO SE O USUÁRIO EXISTE
   const { userId } = await auth();
 
   if (!userId) {
     redirect("/login")
   }
+  
+  return userId
+}
+
+const HomePage = async ({searchParams: { month } }: HomeProps) => {
+  const userId = await getUserId();
 
   // VALIDAÇÃO DO MÊS
   const monthIsInvalid = !month || !isMatch(month, "MM");
