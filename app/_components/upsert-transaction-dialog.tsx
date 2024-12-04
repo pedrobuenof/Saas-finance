@@ -14,22 +14,12 @@ import { DatePicker } from "./ui/date-picker";
 import upsertTransaction from "../_actions/upsert-transactions";
 
 const formSchema = z.object({
-  name: z.string().trim().min(1, {
-    message: "O nome é obrigatório",
-  }),
-  amount: z.number({required_error: "O valor é obrigatório"}).positive({message: "O valor deve ser positivo"}),
-  type: z.nativeEnum(TransactionType, {
-    required_error: "O tipo é obrigatório",
-  }),
-  category: z.nativeEnum(TransactionCategory, {
-    required_error: "A categoria é obrigatória",
-  }),
-  paymentMethod: z.nativeEnum(TransactionPaymentMethod, {
-    required_error: "O método de pagamento é obrigatório",
-  }),
-  date: z.date({
-    required_error: " A data é obrigatória",
-  })
+  name: z.string().trim().min(1, { message: "O nome é obrigatório", }),
+  amount: z.number().positive({message: "O valor deve ser positivo"}),
+  type: z.nativeEnum(TransactionType, { required_error: "O tipo é obrigatório", }),
+  category: z.nativeEnum(TransactionCategory, { required_error: "A categoria é obrigatória", }),
+  paymentMethod: z.nativeEnum(TransactionPaymentMethod, { required_error: "O método de pagamento é obrigatório", }),
+  date: z.date({ required_error: " A data é obrigatória", })
 })
 
 type FormSchema = z.infer<typeof formSchema>
@@ -54,11 +44,15 @@ const UpsertTransctionDialog = ({isOpen, setIsOpen, defaultValues, transactionId
     },
   })
 
+  const closeDialog = () => {
+    setIsOpen(false);
+    form.reset();
+  };
+
   const onSubmit = async (data: FormSchema) => {
     try {
       await upsertTransaction({...data, id: transactionId})
-      setIsOpen(false)
-      form.reset()
+      closeDialog()
     } catch (error) {
       console.error(error)
     }
@@ -67,14 +61,7 @@ const UpsertTransctionDialog = ({isOpen, setIsOpen, defaultValues, transactionId
   const isUpdate = Boolean(transactionId)
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        setIsOpen(open)
-        if (!open) {
-          form.reset();
-        }
-    }}>
+    <Dialog open={isOpen} onOpenChange={(open) => (open ? setIsOpen(open) : closeDialog())}>
       <DialogTrigger asChild>
 
       </DialogTrigger>
