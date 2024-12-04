@@ -20,6 +20,12 @@ const AddTransactionButton = ({
 }: AddTransactionButtonProps) => {
   const [dialogIsOpen, setDialogIsOpen] = useState(false);
 
+  const handleButtonClick = () => {
+    if (userCanAddTransaction) {
+      setDialogIsOpen(true)
+    }
+  }
+
   return (
     <>
       <TooltipProvider>
@@ -27,17 +33,18 @@ const AddTransactionButton = ({
           <TooltipTrigger asChild>
             <Button
               className="rounded-full font-bold"
-              onClick={() => setDialogIsOpen(true)}
+              onClick={handleButtonClick}
               disabled={!userCanAddTransaction}
             >
               Adicionar transação
-              <ArrowDownUpIcon />
+              <ArrowDownUpIcon aria-label="Ícone de adicionar transação"/>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            {!userCanAddTransaction &&
-              "Você atingiu o limite de transações. Atualize seu plano para criar transações ilimitadas."}
-          </TooltipContent>
+          {!userCanAddTransaction && (
+            <TooltipContent>
+              Você atingiu o limite de transações. Atualize seu plano para criar transações ilimitadas.
+            </TooltipContent>
+          )}
         </Tooltip>
       </TooltipProvider>
       <UpsertTransactionDialog
