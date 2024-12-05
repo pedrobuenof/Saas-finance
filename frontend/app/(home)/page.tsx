@@ -22,7 +22,7 @@ const getUserId = async () => {
   const { userId } = await auth();
 
   if (!userId) {
-    redirect("/login")
+    redirect("/logins")
   }
   
   return userId
